@@ -1,0 +1,145 @@
+### Reactive programming using java and project reactor
+
+Initial classes
+
+- User.java
+```java
+public class User {
+    private int id;
+    private String firstName;
+    private String lastName;
+
+    public User(int id, String firstName, String lastName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
+    }
+}
+
+```
+
+- StreamSources.java
+```java
+import java.util.stream.Stream;
+
+public class StreamSources {
+    public static Stream<String> stringNumbersStream(){
+        return Stream.of("one", "two", "three", "four", "five", "six", "seven", "eight", "nine");
+    }
+
+    public static Stream<Integer> intNumberStream(){
+        return Stream.iterate(0, i -> i + 2).limit(10);
+    }
+
+    public static Stream<User> userStream(){
+        return Stream.of(
+                new User(1, "Lionel", "Messi"),
+                new User(2, "Cristiano", "Ronaldo"),
+                new User(2, "Diego", "Maradona"),
+                new User(4, "Zinedine", "Zidane"),
+                new User(5, "Jürgen", "Klinsmann"),
+                new User(6, "Gareth", "Bale")
+        );
+    }
+}
+
+```
+
+- ReactiveSources.java
+
+```java
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+
+public class ReactiveSources {
+    public static Flux<String> stringNumbersFlux(){
+        return Flux.just("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+                .delayElements(Duration.ofSeconds(1));
+    }
+
+    public static Flux<Integer> intNumbersFlux(){
+        return Flux.range(1, 10).delayElements(Duration.ofSeconds(1));
+    }
+
+    public static Flux<Integer> intNumbersFluxWithException(){
+        return Flux.range(1, 10)
+                .delayElements(Duration.ofSeconds(1))
+                .map(e->{
+                    if (e==5) throw new RuntimeException("An error happen in the flux");
+                    return e;
+                });
+    }
+
+    public static Mono<Integer> intNumberMono(){
+        return Mono.just(42).delayElement(Duration.ofSeconds(1));
+    }
+
+    public static Flux<User> userFlux(){
+        return Flux.just(
+                new User(1, "Lionel", "Messi"),
+                new User(2, "Cristiano", "Ronaldo"),
+                new User(2, "Diego", "Maradona"),
+                new User(4, "Zinedine", "Zidane"),
+                new User(5, "Jürgen", "Klinsmann"),
+                new User(6, "Gareth", "Bale")
+        ).delayElements(Duration.ofSeconds(1));
+    }
+
+    public static Mono<User> userMono() {
+        return Mono.just(
+                new User(1, "Lionel", "Messi")
+        ).delayElement(Duration.ofSeconds(1));
+
+    }
+
+    public static Flux<String> unresponsiveFlux() {
+        return Flux.never();
+    }
+
+    public static Mono<String> unresponsiveMono() {
+        return Mono.never();
+    }
+
+    public static Flux<Integer> intNumbersFluxWithRepeat() {
+        return Flux
+                .just(1, 2, 1, 1, 3, 2, 4, 5, 1)
+                .delayElements(Duration.ofSeconds(1));
+    }
+}
+
+```
